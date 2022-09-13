@@ -200,7 +200,7 @@ impl<T: Read> Decoder<T> {
             mini_block_size: BLOCK_LEN,
         };
 
-        if total_count > 0 {
+        if total_count > 1 {
             decoder.read_block()?;
         }
 
