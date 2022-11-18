@@ -177,9 +177,9 @@ pub struct Decoder<T: Read> {
 
 impl<T: Read> Decoder<T> {
     pub fn new(mut io: T) -> anyhow::Result<Self> {
-        let block_size: usize = io.read_vlq().unwrap();
-        let mini_blocks = io.read_vlq().unwrap();
-        let total_count = io.read_vlq().unwrap();
+        let block_size: usize = io.read_vlq().map_err(|e| anyhow::anyhow!(e))?;
+        let mini_blocks = io.read_vlq().map_err(|e| anyhow::anyhow!(e))?;
+        let total_count = io.read_vlq().map_err(|e| anyhow::anyhow!(e))?;
 
         if block_size == 0 || mini_blocks == 0 || block_size / mini_blocks != BLOCK_LEN {
             anyhow::bail!("Invalid header {} {}", block_size, mini_blocks)
@@ -229,7 +229,7 @@ impl<T: Read> Decoder<T> {
             self.read_deltas()?;
         }
 
-        let value = self.previous_value + self.deltas.pop_front().unwrap();
+        let value = self.previous_value + self.deltas.pop_front().unwrap_or_default();
         self.previous_value = value;
         Ok(value)
     }
@@ -260,7 +260,7 @@ impl<T: Read> Decoder<T> {
             self.read_block()?;
         }
 
-        let bit_width = self.bit_widths.pop_front().unwrap();
+        let bit_width = self.bit_widths.pop_front().unwrap_or_default();
         let result = if bit_width > 0u8 {
             let mut packed = vec![0_u8; BLOCK_LEN / 8 * bit_width as usize];
             self.io.read(&mut packed).map_err(|e| anyhow::anyhow!(e))?;
