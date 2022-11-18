@@ -1,10 +1,13 @@
+pub mod delta_vec;
+
 use crate::bitpacker64::{num_bits, BLOCK_LEN};
 use crate::{bitpacker64, zig_zag};
+pub use delta_vec::{DeltaVec, DeltaVecDecimal};
 use std::collections::VecDeque;
 use std::io::{Cursor, Read, Write};
 use vlq::{ReadVlqExt, WriteVlqExt};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Encoder {
     pub first_value: i64,
     pub previous_value: i64,

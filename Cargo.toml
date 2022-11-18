@@ -9,7 +9,12 @@ edition = "2021"
 vlq = { package = "vlq-rust", version = "0.2" }
 anyhow = "1.0.62"
 crunchy = "0.2.2"
+serde = "1.0.147"
+serde_derive = "1.0.147"
+bytes = "1.2.1"
+rust_decimal = "1.26.1"
 
 [dev-dependencies]
 rand = "0.8.5"
 rand_chacha = "0.3.1"
+serde_json = "1.0.87"
