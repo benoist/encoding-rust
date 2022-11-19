@@ -20,9 +20,21 @@ impl DeltaVecDecimal {
             delta_vec: DeltaVec::new(),
         }
     }
+    pub fn len(&self) -> usize {
+        self.delta_vec.len
+    }
 
     pub fn push(&mut self, item: Decimal) {
         self.extend(vec![item])
+    }
+
+    pub fn clear(&mut self) {
+        self.delta_vec.clear();
+    }
+
+    pub fn replace(&mut self, items: Vec<Decimal>) {
+        self.clear();
+        self.extend(items);
     }
 
     pub fn extend(&mut self, items: Vec<Decimal>) {
@@ -65,11 +77,19 @@ impl DeltaVecDecimal {
 #[derive(Serialize, Deserialize)]
 pub struct DeltaVec {
     bytes: Vec<u8>,
+    len: usize,
 }
 
 impl DeltaVec {
     pub fn new() -> Self {
-        Self { bytes: vec![] }
+        Self {
+            bytes: vec![],
+            len: 0,
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.len
     }
 
     pub fn push(&mut self, item: i64) {
@@ -96,8 +116,12 @@ impl DeltaVec {
         self.flush(&mut encoder);
     }
 
-    pub fn replace(&mut self, items: Vec<i64>) {
+    pub fn clear(&mut self) {
         self.bytes.clear();
+    }
+
+    pub fn replace(&mut self, items: Vec<i64>) {
+        self.clear();
         self.extend(items);
     }
 
@@ -111,6 +135,7 @@ impl DeltaVec {
     }
 
     fn flush(&mut self, encoder: &mut Encoder) {
+        self.len = encoder.total_count;
         encoder.flush().unwrap();
         let mut buffer = std::io::Cursor::new(vec![]);
         encoder.write(&mut buffer).unwrap();

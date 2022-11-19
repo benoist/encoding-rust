@@ -26,7 +26,7 @@ pub struct Encoder {
 fn write_zig_zag_var_int<T: Write>(buffer: &mut T, value: i64) -> anyhow::Result<()> {
     buffer
         .write_vlq(zig_zag::encode64(value))
-        .map_err(|e| anyhow::anyhow!(e))
+        .map_err(|e| anyhow::anyhow!("write_zig_zag_var_int failed {}, {:?}", value, e))
 }
 
 fn decode_zig_zag_var_int<T: Read>(buffer: &mut T) -> anyhow::Result<i64> {
@@ -148,11 +148,11 @@ impl Encoder {
     }
 
     pub fn write<T: Write>(&mut self, io: &mut T) -> anyhow::Result<()> {
-        io.write_vlq(self.block_size)
+        io.write_vlq(self.block_size as i64)
             .map_err(|e| anyhow::anyhow!("Block size failed {}, {:?}", self.block_size, e))?;
-        io.write_vlq(self.mini_blocks)
+        io.write_vlq(self.mini_blocks as i64)
             .map_err(|e| anyhow::anyhow!("Mini block size failed {}, {:?}", self.mini_blocks, e))?;
-        io.write_vlq(self.total_count)
+        io.write_vlq(self.total_count as i64)
             .map_err(|e| anyhow::anyhow!("Total size failed {}, {:?}", self.total_count, e))?;
 
         write_zig_zag_var_int(io, self.first_value)?;
@@ -180,26 +180,26 @@ pub struct Decoder<T: Read> {
 
 impl<T: Read> Decoder<T> {
     pub fn new(mut io: T) -> anyhow::Result<Self> {
-        let block_size: usize = io.read_vlq().map_err(|e| anyhow::anyhow!(e))?;
-        let mini_blocks = io.read_vlq().map_err(|e| anyhow::anyhow!(e))?;
-        let total_count = io.read_vlq().map_err(|e| anyhow::anyhow!(e))?;
+        let block_size: i64 = io.read_vlq().map_err(|e| anyhow::anyhow!(e))?;
+        let mini_blocks: i64 = io.read_vlq().map_err(|e| anyhow::anyhow!(e))?;
+        let total_count: i64 = io.read_vlq().map_err(|e| anyhow::anyhow!(e))?;
 
-        if block_size == 0 || mini_blocks == 0 || block_size / mini_blocks != BLOCK_LEN {
+        if block_size == 0 || mini_blocks == 0 || (block_size / mini_blocks) as usize != BLOCK_LEN {
             anyhow::bail!("Invalid header {} {}", block_size, mini_blocks)
         }
 
         let first_value = decode_zig_zag_var_int(&mut io)?;
 
         let mut decoder = Self {
-            total_count,
+            total_count: total_count as usize,
             first_value,
             previous_value: first_value,
-            bit_widths: VecDeque::with_capacity(mini_blocks),
+            bit_widths: VecDeque::with_capacity(mini_blocks as usize),
             min_delta: 0,
             deltas: Default::default(),
             values_read: 0,
             io,
-            mini_blocks,
+            mini_blocks: mini_blocks as usize,
             mini_block_size: BLOCK_LEN,
         };
 
