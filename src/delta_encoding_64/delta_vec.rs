@@ -82,6 +82,10 @@ impl DeltaVec {
     }
 
     pub fn extend(&mut self, items: Vec<i64>) {
+        if items.len() == 0 {
+            return;
+        }
+
         let mut encoder = Encoder::new(1);
         for int in self.to_vec() {
             encoder.write_integer(int).unwrap_or_default();

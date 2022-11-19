@@ -149,11 +149,11 @@ impl Encoder {
 
     pub fn write<T: Write>(&mut self, io: &mut T) -> anyhow::Result<()> {
         io.write_vlq(self.block_size)
-            .map_err(|e| anyhow::anyhow!(e))?;
+            .map_err(|e| anyhow::anyhow!("Block size failed {}, {:?}", self.block_size, e))?;
         io.write_vlq(self.mini_blocks)
-            .map_err(|e| anyhow::anyhow!(e))?;
+            .map_err(|e| anyhow::anyhow!("Mini block size failed {}, {:?}", self.mini_blocks, e))?;
         io.write_vlq(self.total_count)
-            .map_err(|e| anyhow::anyhow!(e))?;
+            .map_err(|e| anyhow::anyhow!("Total size failed {}, {:?}", self.total_count, e))?;
 
         write_zig_zag_var_int(io, self.first_value)?;
 
