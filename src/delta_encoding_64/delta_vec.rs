@@ -5,7 +5,7 @@ use serde_derive::{Deserialize, Serialize};
 use std::io::Cursor;
 use std::ops::Div;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DeltaVecDecimal {
     multiplier: Decimal,
     max_value: Decimal,
@@ -74,7 +74,7 @@ impl DeltaVecDecimal {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DeltaVec {
     bytes: Vec<u8>,
     len: usize,
